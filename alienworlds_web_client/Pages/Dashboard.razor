@@ -1,0 +1,383 @@
+﻿@page "/Dashboard/{select}"
+@page "/Dashboard/"
+@using aw_class
+<PageTitle>Dashboard</PageTitle>
+<h3>Dashboard/@select</h3>
+<ul class="nav justify-content-center">
+    <li class="nav-item">
+        <a class="nav-link" aria-current="page" href="/Dashboard/account">Account</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" aria-current="page" href="/Dashboard/miner">Miner</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" aria-current="page" href="/Dashboard/minert">Miner(Text)</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" aria-current="page" href="/Dashboard/monitor">Monitor</a>
+    </li>
+</ul>
+
+<div style="min-width:900px">
+
+    @if (select == null || select == "account")
+    {
+        <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#add_wax_account_modal">Add</button>
+
+        <div class="row">
+            <div class="col-1"><label>Id</label></div>
+            <div class="col"><label>WAX Username</label></div>
+            <div class="col"><label>WAX Password</label></div>
+            <div class="col"><label>WAX Token</label></div>
+            <div class="col-2"></div>
+        </div>
+        @foreach (var item in Enumerable.Reverse(_wax_account))
+        {
+
+            <EditForm Model="item" OnValidSubmit="()=>update_wax_account(item)" class="row">
+                <DataAnnotationsValidator />
+                <div class="col-1">
+                    <label>@item.wax_account_id</label>
+                </div>
+                <div class="col">
+                    <InputText @bind-Value="item.wax_username" type="text" class="form-control" />
+                    <ValidationMessage For="@(() => item.wax_username)" />
+                </div>
+                <div class="col">
+                    <InputText @bind-Value="item.wax_password" type="password" class="form-control" />
+                    <ValidationMessage For="@(() => item.wax_password)" />
+                </div>
+                <div class="col">
+                    <InputText @bind-Value="item.wax_token" type="text" class="form-control" />
+                    <ValidationMessage For="@(() => item.wax_token)" />
+                </div>
+                <div class="col-2" style="display:inline-block">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="button" class="btn btn-danger" @onclick="()=>remove_wax_account(item.wax_account_id)">Remove</button>
+                </div>
+            </EditForm>
+        }
+        <div class="modal fade" id="add_wax_account_modal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Settings</h5>
+                    </div>
+
+                    <EditForm Model="this" OnValidSubmit="()=> insert_wax_account(_add_wax_account)">
+                        <div class="modal-body">
+                            <DataAnnotationsValidator />
+
+                            <div class="col">
+                                <label>WAX Username</label>
+                                <InputText type="text" @bind-Value="_add_wax_account.wax_username" class="form-control" />
+                            </div>
+                            <div class="col">
+                                <label>WAX Password</label>
+                                <InputText type="text" @bind-Value="_add_wax_account.wax_password" class="form-control" />
+                            </div>
+                            <div class="col">
+                                <label>Token</label>
+                                <InputText type="text" @bind-Value="_add_wax_account.wax_token" class="form-control" />
+                            </div>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Save changes</button>
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Discard</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    }
+    else if (select == "miner")
+    {
+
+        <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#add_wax_miner_modal">Add</button>
+        <button type="button" class="btn btn-light" @onclick="()=>reload()">Reload</button>
+        <div class="row">
+            <div class="col-1"><label>Id</label></div>
+            <div class="col"><label>Account</label></div>
+            <div class="col-2 text-nowrap"><label>Tag miner</label></div>
+            <div class="col"><label>PublicKey</label></div>
+            <div class="col"><label>State</label></div>
+            <div class="col"><label>Setting</label></div>
+            <div class="col text-nowrap"><label>State end</label></div>
+            <div class="col text-nowrap"><label>Last state</label></div>
+            <div class="col-2"></div>
+        </div>
+        @foreach (var item in Enumerable.Reverse(_wax_miner))
+        {
+            <EditForm Model="item" OnValidSubmit="()=>update_wax_miner(item)" class="row">
+                <DataAnnotationsValidator />
+                <div class="col-1">
+                    <label>@item.wax_account_id</label>
+                </div>
+                <div class="col">
+                    <InputText @bind-Value="item.miner.accountName" type="text" class="form-control" />
+                    <ValidationMessage For="@(() => item.miner.accountName)" />
+                </div>
+
+                <div class="col">
+                    <div class="text-nowrap bd-highlight" style="width: 8rem;">
+                        @item.miner.tag_miner.ToString()
+                    </div>
+
+                </div>
+                <div class="col">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#publicKeys_modal" @onclick="()=>viewpublickeys(_wax_miner.IndexOf(item))">View</button>
+                </div>
+
+                <div class="col">
+                    <InputSelect @bind-Value="item.miner.state" class="form-control">
+                        <option selected value="@item.miner.state">@item.miner.state</option>
+                        @foreach (var item in Enum.GetNames(typeof(user_state)))
+                        {
+                    <option>@item</option>
+                        }
+
+            </InputSelect>
+        </div>
+
+        <div class="col">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#state_settings_modal" @onclick="()=>viewstatesteeings(_wax_miner.IndexOf(item))">View</button>
+        </div>
+        <div class="col">
+            <label>@item.miner.state_end</label>
+        </div>
+        <div class="col">
+            <label>@item.miner.last_state</label>
+        </div>
+
+        <div class="col-2" style="display:inline-block">
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="button" class="btn btn-danger" @onclick="()=>remove_wax_miner(item.wax_account_id,item.miner.tag_miner)">Remove</button>
+        </div>
+    </EditForm>
+        }
+        <div class="modal fade" id="add_wax_miner_modal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Settings</h5>
+                    </div>
+                    <EditForm Model="this" OnValidSubmit="()=>insert_wax_miner(_add_wax_miner)">
+                        <div class="modal-body">
+                            <DataAnnotationsValidator />
+
+                            <div class="col">
+                                <label>ID</label>
+                                <InputSelect @bind-Value="_add_wax_miner.wax_account_id" class="form-control">
+                                    <option selected value="-1">select one</option>
+                                    @foreach (var item in _wax_account)
+                                    {
+                                    <option>@item.wax_account_id</option>
+                                    }
+
+                            </InputSelect>
+                        </div>
+
+                        <div class="col">
+                            <label>TagMiner</label>
+                            <InputSelect @bind-Value="_add_wax_miner.tag_miner" class="form-control">
+                                @foreach (var item in Enum.GetNames(typeof(aw_class.miner)))
+                                    {
+                                    <option>@item</option>
+                                    }
+
+                            </InputSelect>
+                        </div>
+                        <div class="col">
+                            <label>accountName</label>
+                            <InputText type="text" @bind-Value="_add_wax_miner.accountName" class="form-control" />
+                        </div>
+                        <div class="col">
+                            <label>publicKeys</label>
+                            <InputText type="text" @bind-Value="_add_wax_miner.publicKeys" class="form-control" />
+                        </div>
+                        <div class="col">
+                            <label>State</label>
+                            <InputSelect @bind-Value="_add_wax_miner.state" class="form-control">
+                                @foreach (var item in Enum.GetNames(typeof(aw_class.user_state)))
+                                    {
+                                    <option>@item</option>
+                                    }
+
+                            </InputSelect>
+                        </div>
+                        <div class="col">
+                            @foreach (var item in state_settings.settings)
+                                {
+                                    <div class="col">
+                                        <label>@item._key</label>
+                                        <InputNumber type="number" @bind-Value="item._value" class="form-control" />
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Save changes</button>
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Discard</button>
+                        </div>
+                    </EditForm>
+
+                </div>
+            </div>
+        </div>
+
+        <!--Modal PublicKeys-->
+        <div class="modal fade" id="publicKeys_modal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">PublicKeys</h5>
+                    </div>
+                    <EditForm Model="this" OnValidSubmit="()=>pre_update_public_key(pubkey.key)">
+                        <div class="modal-body">
+                            <DataAnnotationsValidator />
+                            @foreach (var key in pubkey.key)
+                            {
+                                <div class="col">
+                                    <label>PUB_K1</label>
+                                    <InputText type="text" @bind-Value="key.pubkey" class="form-control" />
+                                </div>
+                            }
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Save changes</button>
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Discard</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+        <!--Modal State Settings-->
+        <div class="modal fade" id="state_settings_modal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Settings</h5>
+                    </div>
+
+                    <EditForm Model="this" OnValidSubmit="()=>pre_update_settings(state_settings.settings)">
+                        <div class="modal-body">
+                            <DataAnnotationsValidator />
+                            @foreach (var item in state_settings.settings)
+                            {
+                                <div class="col">
+                                    <label>@item._key</label>
+                                    <InputNumber type="number" @bind-Value="item._value" class="form-control" />
+                                </div>
+                            }
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Save changes</button>
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Discard</button>
+                        </div>
+                    </EditForm>
+
+                </div>
+            </div>
+        </div>
+    }
+    else if (select == "minert")
+    {
+        <table class="table table-striped table-dark">
+                    <thead>
+                        <tr>
+                            <th scope="col">id</th>
+                            <th scope="col">account_name</th>
+                            <th scope="col">tag_miner</th>
+                            <th scope="col">state</th>
+                            <th scope="col">state end</th>
+                            <th scope="col">last state</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var item in Enumerable.Reverse(_wax_miner))
+                        {
+                            <tr>
+
+                                <td>@item.wax_account_id</td>
+                                <td>@item.miner.accountName</td>
+                                <td>@item.miner.tag_miner</td>
+                                <td>@item.miner.state</td>
+                                <td>@item.miner.state_end</td>
+                                <td>@item.miner.last_state</td>
+                            </tr>
+
+                        }
+                    </tbody>
+
+                </table>
+
+    }
+    else if (select == "monitor")
+    {
+        <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#add_wax_monitor_master_modal">Add</button>
+        <div class="row">
+            <div class="col-1"><label>Id</label></div>
+            <div class="col"><label>Account</label></div>
+        </div>
+        <!--_wax_monitor_master-->
+        @foreach (var item in Enumerable.Reverse(_wax_monitor_master))
+        {
+            <EditForm Model="item" OnValidSubmit="()=>update_wax_monitor(item)" class="row">
+                <DataAnnotationsValidator />
+                <div class="col-1">
+                    <label>@item.wax_account_id</label>
+                </div>
+                <div class="col">
+                    <InputText @bind-Value="item.invester" type="text" class="form-control" />
+                    <ValidationMessage For="@(() => item.invester)" />
+                </div>
+                <div class="col-2" style="display:inline-block">
+                    <button type="button" class="btn btn-danger" @onclick="()=>remove_wax_monitor(item)">Remove</button>
+                </div>
+            </EditForm>
+        }
+
+        <div class="modal fade" id="add_wax_monitor_master_modal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Settings</h5>
+                    </div>
+                    <EditForm Model="this" OnValidSubmit="()=>add_wax_monitor(_add_wax_monitor)">
+                        <div class="modal-body">
+                            <DataAnnotationsValidator />
+
+                            <div class="col">
+                                <label>ID</label>
+                                <InputSelect @bind-Value="_add_wax_monitor.wax_account_id" class="form-control">
+                                    <option selected value="-1">select one</option>
+                                    @foreach (var item in _wax_account)
+                                    {
+                                    <option>@item.wax_account_id</option>
+                                    }
+
+                            </InputSelect>
+                        </div>
+                        <div class="col">
+                            <label>Invester</label>
+                            <InputText @bind-Value="_add_wax_monitor.invester" type="text" class="form-control" />
+                            <ValidationMessage For="@(() => _add_wax_monitor.invester)" />
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Save changes</button>
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Discard</button>
+                    </div>
+                </EditForm>
+
+            </div>
+        </div>
+    </div>
+
+
+    }
+
+</div>

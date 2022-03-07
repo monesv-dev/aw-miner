@@ -1,0 +1,1 @@
+C:\Users\tou_m\source\repos\alienworlds_projectv4\alienworlds_web_client\obj\Release\net6.0\browser-wasm\PubTmp\Out\web.config

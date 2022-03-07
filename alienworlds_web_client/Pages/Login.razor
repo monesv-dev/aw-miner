@@ -1,0 +1,40 @@
+﻿@page "/Login"
+
+<PageTitle>login</PageTitle>
+
+<div class="row justify-content-md-center">
+
+    <div class="col-md-auto">
+
+        <EditForm Model="@model" OnValidSubmit="SubmitLogin">
+            <DataAnnotationsValidator />
+            <div class="form-group">
+                <label>Username</label>
+                <InputText @bind-Value="model.username" type="text"  class="form-control" />
+                <ValidationMessage For="@(() => model.username)" />
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <InputText @bind-Value="model.password" type="password" class="form-control" />
+                <ValidationMessage For="@(() => model.password)" />
+            </div>
+            @if (!string.IsNullOrEmpty(status))
+            {
+                <div class="alert alert-danger mt-3 mb-0">@status</div>
+            }<br>
+           <button type="submit" class="btn btn-secondary float-end">Login</button>
+
+        </EditForm>
+
+    </div>
+
+</div>
+
+
+<!--
+<div class="col-6">
+    <button class="btn btn-primary" @onclick="async()=>await  SubmitLogin()">Login</button>
+    <button class="btn btn-primary" @onclick="async()=>await  Test_Get()">Login1</button>
+    <button class="btn btn-primary" @onclick="async()=>await  Test_Remove()">Login2</button>
+</div>
+-->
