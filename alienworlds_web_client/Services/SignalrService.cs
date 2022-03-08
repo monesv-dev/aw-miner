@@ -29,7 +29,7 @@ namespace alienworlds_web_client.Services
     {
 
         private HubConnection _connection;
-        private string url = "https://api.monesv.ml/socket";//http://localhost:5235
+        private string url = "https://api.mineriris.xyz/socket";//http://localhost:5235
         public EventHandler<string> testupdated { get; set; }
         public EventHandler<WaxAccountViewModel>? e_add_wax_account { get; set; }
         public EventHandler<WaxAccountViewModel>? e_update_wax_account { get; set; }
